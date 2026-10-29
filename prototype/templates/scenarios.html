@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card"><h2>Kịch bản tự động (mỗi kịch bản chạy trên dữ liệu mới)</h2>
+  <p class="muted">Bao gồm luồng bình thường và các tình huống thông tin đầu vào bị giả mạo, chỉnh sửa, đánh cắp hoặc dùng sai ngữ cảnh.</p></div>
+{% for sc in results %}
+<div class="card">
+  <h2>{{ sc.id }} – {{ sc.title }}</h2>
+  <table>{% for s in sc.steps %}<tr>
+    <td style="width:130px"><span class="tag {{ 'BLOCKED' if s.result in ['BỊ CHẶN', 'PHÁT HIỆN'] else ('APPROVED' if s.result == 'THÀNH CÔNG' else '') }}">{{ s.result }}</span></td>
+    <td>{{ s.step }}<br><span class="muted">{{ s.detail }}</span></td></tr>{% endfor %}</table>
+</div>
+{% endfor %}
+{% endblock %}

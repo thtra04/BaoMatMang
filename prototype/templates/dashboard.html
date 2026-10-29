@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="grid">
+  <div>
+    {% if can_create %}
+    <div class="card">
+      <h2>Tạo lệnh chuyển tiền</h2>
+      <form method="post" action="/payments">
+        <div class="row">
+          <div><label>Người thụ hưởng (chỉ chọn trong sổ đăng ký đã xác minh)</label>
+            <select name="beneficiary_id">{% for b in svc.beneficiaries.values() %}
+              <option value="{{ b.id }}">{{ b.name }} – {{ b.bank }} {{ b.account_no }}</option>{% endfor %}</select></div>
+          <div><label>Số tiền (VND)</label><input name="amount" value="40000000"></div>
+        </div>
+        <label>Nội dung</label><input name="purpose" value="Thanh toán hoá đơn tháng 10">
+        <h3>Yêu cầu này đến từ đâu? <span class="muted">(thông tin bên ngoài – hệ thống coi là chưa xác minh)</span></h3>
+        <div class="row">
+          <div><label>Kênh nhận yêu cầu</label>
+            <select name="channel">{% for k, v in CHANNELS.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></div>
+          <div><label>Người yêu cầu tự xưng là</label>
+            <select name="claimed_by"><option value="">— không —</option>
+              {% for u in approvers %}<option value="{{ u.username }}">{{ u.full_name }} ({{ ROLE_NAMES[u.role] }})</option>{% endfor %}</select></div>
+          <div><label>STK ghi trong tin nhắn (nếu có)</label><input name="account_in_msg" placeholder="để trống nếu không có"></div>
+        </div>
+        <label><input type="checkbox" name="urgent" style="width:auto"> Người yêu cầu nhấn mạnh khẩn cấp / bí mật</label>
+        <button>Tạo lệnh</button>
+      </form>
+    </div>
+    {% endif %}
+    <div class="card">
+      <h2>Danh sách lệnh</h2>
+      <table>
+        <tr><th>Mã</th><th>Thụ hưởng</th><th>Số tiền</th><th>Kênh</th><th>Rủi ro</th><th>Trạng thái</th></tr>
+        {% for r in reqs %}
+        <tr><td><a href="/payments/{{ r.id }}">{{ r.id }}</a></td><td>{{ r.beneficiary_name }}</td>
+          <td>{{ r.amount|vnd }}</td><td>{{ CHANNELS[r.source_channel] }}</td>
+          <td><span class="tag {{ r.risk.level }}">{{ r.risk.level }} {{ r.risk.score }}</span></td>
+          <td><span class="tag {{ r.status }}">{{ r.status }}</span></td></tr>
+        {% else %}<tr><td colspan="6" class="muted">Chưa có lệnh nào</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+  <div>
+    <div class="card"><h2>Thông báo của tôi</h2>
+      {% for n in notes %}<p>{{ n.message }}<br><span class="muted">{{ n.ts|ts }}</span></p>{% else %}<p class="muted">Không có</p>{% endfor %}
+    </div>
+    {% if alerts %}
+    <div class="card"><h2>Cảnh báo bảo mật</h2>
+      {% for a in alerts %}<p><span class="tag {{ 'CRITICAL' if a.level == 'CRITICAL' else 'MEDIUM' }}">{{ a.level }}</span> {{ a.message }}<br>
+        <span class="muted">{{ a.ts|ts }}</span></p>{% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

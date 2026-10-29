@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="grid">
+  <div>
+    <div class="card">
+      <h2>Đăng nhập (mật khẩu + OTP + chứng minh sở hữu thiết bị)</h2>
+      <form method="post" action="/login">
+        <div class="row">
+          <div><label>Tên đăng nhập</label><input name="username" id="u" value="ketoan"></div>
+          <div><label>Mật khẩu</label><input name="password" id="p" type="password" value="KeToan@2026"></div>
+        </div>
+        <div class="row">
+          <div><label>Mã OTP (6 số)</label><input name="otp" id="o" autocomplete="off"></div>
+          <div><label>Đăng nhập từ thiết bị</label>
+            <select name="device_id" id="d">
+              {% for did, owner in devices.items() %}<option value="{{ did }}">{{ did }}</option>{% endfor %}
+            </select></div>
+        </div>
+        <button>Đăng nhập</button>
+      </form>
+      <p class="muted">Máy chủ gửi một <i>challenge</i> ngẫu nhiên; thiết bị đã chọn phải ký challenge đó bằng khoá riêng.
+        Thiết bị không đăng ký / chưa được duyệt sẽ bị từ chối dù mật khẩu và OTP đúng.</p>
+    </div>
+    <div class="card">
+      <h2>Yêu cầu thêm thiết bị mới (cần quản trị viên duyệt)</h2>
+      <form method="post" action="/enroll" class="row">
+        <div><label>Tên đăng nhập</label><input name="username" value="ketoantruong"></div>
+        <div><label>Mật khẩu</label><input name="password" type="password"></div>
+        <div><label>OTP</label><input name="otp"></div>
+        <div><label>Tên thiết bị</label><input name="label" value="Laptop mới"></div>
+        <div style="flex-basis:100%"><button class="ghost">Gửi yêu cầu</button></div>
+      </form>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <h2>Tài khoản demo</h2>
+      <p class="muted">Cột OTP mô phỏng ứng dụng Authenticator trên điện thoại từng người · đổi sau <b id="remain">–</b>s</p>
+      <table>
+        <tr><th>Tài khoản</th><th>Vai trò</th><th>OTP</th></tr>
+        {% for u in users %}
+        <tr style="cursor:pointer" onclick="pick('{{ u[0] }}','{{ u[3] }}')">
+          <td><b>{{ u[0] }}</b><br><span class="muted">{{ u[3] }}</span></td>
+          <td>{{ ROLE_NAMES[u[2]] }}</td><td><code id="otp-{{ u[0] }}">……</code></td></tr>
+        {% endfor %}
+      </table>
+      <p class="muted">Bấm vào một dòng để điền sẵn. Thiết bị <code>&lt;user&gt;-phone</code> là thiết bị hợp lệ của từng người.</p>
+    </div>
+    <div class="card"><form method="post" action="/reset"><b>Dữ liệu demo</b><br><button class="ghost">Khởi tạo lại</button></form></div>
+  </div>
+</div>
+<script>
+  let codes = {};
+  async function refresh() {
+    try {
+      codes = await (await fetch('/otp')).json();
+      document.getElementById('remain').textContent = codes._remain;
+      for (const k in codes) { const el = document.getElementById('otp-' + k); if (el) el.textContent = codes[k]; }
+    } catch (e) {}
+  }
+  function pick(u, p) {
+    document.getElementById('u').value = u; document.getElementById('p').value = p;
+    document.getElementById('o').value = codes[u] || '';
+    document.getElementById('d').value = u + '-phone';
+  }
+  refresh(); setInterval(refresh, 1000);
+</script>
+{% endblock %}

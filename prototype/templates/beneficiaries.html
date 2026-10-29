@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card">
+  <h2>Sổ đăng ký nhà cung cấp (nguồn tin cậy – đã xác minh khi ký hợp đồng)</h2>
+  <table><tr><th>Mã</th><th>Tên</th><th>Ngân hàng / STK</th><th>SĐT đã xác minh</th><th>Trạng thái</th><th>Chờ an toàn đến</th></tr>
+  {% for b in benes %}<tr><td>{{ b.id }}</td><td>{{ b.name }}</td><td>{{ b.bank }} – <b>{{ b.account_no }}</b></td>
+    <td>{{ b.contact_phone }}</td><td><span class="tag {{ b.status }}">{{ b.status }}</span></td>
+    <td>{{ b.cooling_until|ts if b.cooling_until else '' }}</td></tr>{% endfor %}</table>
+</div>
+<div class="grid">
+  <div class="card">
+    <h2>Yêu cầu đổi số tài khoản</h2>
+    <table><tr><th>Mã</th><th>NCC</th><th>STK mới</th><th>Kênh</th><th>Trạng thái</th><th>Thao tác</th></tr>
+    {% for c in changes %}<tr><td>{{ c.id }}</td><td>{{ svc.beneficiaries[c.beneficiary_id].name }}</td>
+      <td>{{ c.new_bank }} – {{ c.new_account_no }}<br><span class="muted">{{ c.note }}</span></td>
+      <td>{{ CHANNELS[c.source_channel] }}</td><td><span class="tag {{ c.status }}">{{ c.status }}</span></td>
+      <td>
+        {% if c.status == 'PENDING_CALLBACK' %}
+        <form method="post" action="/changes/{{ c.id }}/callback">
+          <input name="phone" placeholder="Số đã gọi lại"><select name="confirmed"><option value="yes">NCC xác nhận</option>
+          <option value="no">NCC phủ nhận</option></select><button>Ghi nhận</button></form>
+        {% elif c.status == 'CALLBACK_OK' %}
+        <form method="post" action="/changes/{{ c.id }}/approve"><button>Ký duyệt đổi STK</button></form>
+        {% endif %}
+      </td></tr>
+    {% else %}<tr><td colspan="6" class="muted">Chưa có</td></tr>{% endfor %}</table>
+  </div>
+  <div class="card">
+    <h2>Tiếp nhận yêu cầu đổi STK</h2>
+    <form method="post" action="/changes">
+      <label>Nhà cung cấp</label><select name="beneficiary_id">{% for b in benes %}<option value="{{ b.id }}">{{ b.name }}</option>{% endfor %}</select>
+      <div class="row"><div><label>Ngân hàng mới</label><input name="bank" value="ACB"></div>
+        <div><label>STK mới</label><input name="account_no" value="88886666999"></div></div>
+      <label>Nhận qua</label><select name="channel">{% for k, v in CHANNELS.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select>
+      <label>Nội dung / số liên hệ trong thư</label><input name="note" value="Email: vui lòng chuyển vào TK mới, LH 0912 345 678">
+      <button>Tiếp nhận</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

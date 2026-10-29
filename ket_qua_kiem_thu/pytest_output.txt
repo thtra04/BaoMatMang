@@ -1,0 +1,50 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\Admin\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+hypothesis profile 'default'
+rootdir: D:\BAITAP\BaoMatMang\prototype
+plugins: anyio-4.12.1, hypothesis-6.152.7, asyncio-1.3.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 38 items
+
+tests/test_safepay.py::test_tc01_login_ok PASSED                         [  2%]
+tests/test_safepay.py::test_tc02_small_payment PASSED                    [  5%]
+tests/test_safepay.py::test_tc03_two_approvers PASSED                    [  7%]
+tests/test_safepay.py::test_tc04_director_required PASSED                [ 10%]
+tests/test_safepay.py::test_tc05_legit_account_change PASSED             [ 13%]
+tests/test_safepay.py::test_tc06_reject PASSED                           [ 15%]
+tests/test_safepay.py::test_tc07_wrong_password PASSED                   [ 18%]
+tests/test_safepay.py::test_tc08_otp_bruteforce_lockout PASSED           [ 21%]
+tests/test_safepay.py::test_tc09_otp_replay PASSED                       [ 23%]
+tests/test_safepay.py::test_tc10_phished_credentials_unknown_device PASSED [ 26%]
+tests/test_safepay.py::test_tc11_device_enrollment_needs_admin PASSED    [ 28%]
+tests/test_safepay.py::test_tc12_spoofed_device_id PASSED                [ 31%]
+tests/test_safepay.py::test_tc13_stolen_session PASSED                   [ 34%]
+tests/test_safepay.py::test_tc14_session_idle_timeout PASSED             [ 36%]
+tests/test_safepay.py::test_tc15_emergency_lock PASSED                   [ 39%]
+tests/test_safepay.py::test_tc16_deepfake_unknown_account PASSED         [ 42%]
+tests/test_safepay.py::test_tc17_deepfake_existing_vendor PASSED         [ 44%]
+tests/test_safepay.py::test_tc18_callback_to_attacker_number PASSED      [ 47%]
+tests/test_safepay.py::test_tc19_callback_denied PASSED                  [ 50%]
+tests/test_safepay.py::test_tc20_bec_fake_vendor_email PASSED            [ 52%]
+tests/test_safepay.py::test_tc21_cooling_period PASSED                   [ 55%]
+tests/test_safepay.py::test_tc22_account_changed_after_approval PASSED   [ 57%]
+tests/test_safepay.py::test_tc23_swapped_display PASSED                  [ 60%]
+tests/test_safepay.py::test_tc24_db_tampering PASSED                     [ 63%]
+tests/test_safepay.py::test_tc25_signature_replay PASSED                 [ 65%]
+tests/test_safepay.py::test_tc26_reject_signature_not_approve PASSED     [ 68%]
+tests/test_safepay.py::test_tc27_audit_log_tamper PASSED                 [ 71%]
+tests/test_safepay.py::test_tc28_self_approval PASSED                    [ 73%]
+tests/test_safepay.py::test_tc29_maker_cannot_approve PASSED             [ 76%]
+tests/test_safepay.py::test_tc30_request_expiry PASSED                   [ 78%]
+tests/test_safepay.py::test_tc31_invalid_amount[0] PASSED                [ 81%]
+tests/test_safepay.py::test_tc31_invalid_amount[-5000000] PASSED         [ 84%]
+tests/test_safepay.py::test_tc31_invalid_amount[20000000000] PASSED      [ 86%]
+tests/test_safepay.py::test_tc31_invalid_amount[1000000] PASSED          [ 89%]
+tests/test_safepay.py::test_tc31_invalid_amount[1.5] PASSED              [ 92%]
+tests/test_safepay.py::test_tc31_invalid_amount[True] PASSED             [ 94%]
+tests/test_safepay.py::test_tc32_double_approval_and_maker_callback PASSED [ 97%]
+tests/test_safepay.py::test_tc33_forged_images PASSED                    [100%]
+
+----- generated xml file: D:\BAITAP\BaoMatMang\ket_qua_kiem_thu\junit.xml -----
+============================= 38 passed in 10.82s =============================

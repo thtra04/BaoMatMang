@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card">
+  <h2>Thiết bị đã đăng ký</h2>
+  <table><tr><th>Mã thiết bị</th><th>Chủ sở hữu</th><th>Mô tả</th><th>Khoá công khai</th><th>Trạng thái</th><th></th></tr>
+  {% for d in devices %}<tr><td><code>{{ d.id }}</code></td><td>{{ users[d.user_id].full_name }}</td><td>{{ d.label }}</td>
+    <td><code>{{ d.public_key[:20] }}…</code></td><td><span class="tag {{ d.status }}">{{ d.status }}</span></td>
+    <td>{% if d.status == 'PENDING' and me.user.role == 'ADMIN' %}
+      <form method="post" action="/devices/{{ d.id }}/approve"><button>Duyệt (đã gặp trực tiếp)</button></form>{% endif %}</td></tr>{% endfor %}</table>
+</div>
+<div class="card">
+  <h2>Khoá khẩn cấp tài khoản</h2>
+  <p class="muted">Thu hồi toàn bộ thiết bị và phiên của người dùng, huỷ mọi chữ ký phê duyệt chưa được thực thi.
+    Chính chủ hoặc quản trị viên được phép kích hoạt.</p>
+  <table>{% for u in users.values() %}<tr><td>{{ u.full_name }}</td><td>{{ ROLE_NAMES[u.role] }}</td><td>
+    {% if me.user.role == 'ADMIN' or me.user.id == u.id %}
+    <form method="post" action="/compromise/{{ u.id }}" onsubmit="return confirm('Khoá khẩn cấp {{ u.full_name }}?')"><button class="danger">Khoá khẩn cấp</button></form>
+    {% endif %}</td></tr>{% endfor %}</table>
+</div>
+{% endblock %}

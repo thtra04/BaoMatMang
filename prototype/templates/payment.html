@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="grid">
+  <div>
+    <div class="card">
+      <h2>Lệnh {{ req.id }} <span class="tag {{ req.status }}">{{ req.status }}</span></h2>
+      <table>
+        <tr><th>Người thụ hưởng</th><td>{{ req.beneficiary_name }}</td></tr>
+        <tr><th>Tài khoản (lấy từ sổ đăng ký)</th><td>{{ req.bank }} – <b>{{ req.account_no }}</b></td></tr>
+        <tr><th>Số tiền</th><td><b>{{ req.amount|vnd }}</b></td></tr>
+        <tr><th>Nội dung</th><td>{{ req.purpose }}</td></tr>
+        <tr><th>Người tạo</th><td>{{ svc.users[req.maker_id].full_name }}</td></tr>
+        <tr><th>Kênh nguồn</th><td>{{ CHANNELS[req.source_channel] }}{% if req.claimed_by %} · tự xưng là
+          <b>{{ svc.users[req.claimed_by].full_name }}</b> (chưa xác minh){% endif %}</td></tr>
+        <tr><th>Hết hạn</th><td>{{ req.expires_at|ts }}</td></tr>
+      </table>
+      <h3>Đánh giá rủi ro: <span class="tag {{ req.risk.level }}">{{ req.risk.level }} – {{ req.risk.score }} điểm</span></h3>
+      <ul>{% for x in req.risk.block_reasons %}<li style="color:var(--err)"><b>CHẶN:</b> {{ x }}</li>{% endfor %}
+          {% for x in req.risk.reasons %}<li>{{ x }}</li>{% else %}{% if not req.risk.block_reasons %}<li class="muted">Không có yếu tố rủi ro</li>{% endif %}{% endfor %}</ul>
+      {% if req.status == 'PENDING_APPROVAL' %}
+      <h3>Điều kiện còn thiếu</h3>
+      <ul>{% for g in gaps %}<li>{{ g }}</li>{% endfor %}</ul>
+      {% endif %}
+      <h3>Chữ ký phê duyệt</h3>
+      <table><tr><th>Người ký</th><th>Thiết bị</th><th>Quyết định</th><th>Chữ ký (Ed25519)</th></tr>
+        {% for a in req.approvals %}<tr><td>{{ svc.users[a.user_id].full_name }}</td><td>{{ a.device_id }}</td>
+          <td>{{ a.decision }}</td><td><code>{{ a.signature[:28] }}…</code></td></tr>
+        {% else %}<tr><td colspan="4" class="muted">Chưa có</td></tr>{% endfor %}</table>
+      {% if req.callback %}<p>Gọi lại: {{ req.callback.phone }} → <b>{{ 'XÁC NHẬN' if req.callback.confirmed else 'PHỦ NHẬN' }}</b> · {{ req.callback.note }}</p>{% endif %}
+      {% if req.bank_ref %}<p>Mã giao dịch ngân hàng: <b>{{ req.bank_ref }}</b></p>{% endif %}
+    </div>
+  </div>
+  <div>
+    {% if me.user.role in ['CHIEF_ACCOUNTANT', 'DIRECTOR'] and req.status == 'PENDING_APPROVAL' %}
+    <div class="card">
+      <h2>📱 Màn hình thiết bị <code>{{ me.device_id }}</code></h2>
+      <div class="phone"><div class="t">Nội dung sẽ được ký (WYSIWYS)</div>
+        Người nhận: {{ payload.beneficiary_name }}<br>Ngân hàng: {{ payload.bank }}<br>STK: {{ payload.account_no }}<br>
+        Số tiền: {{ payload.amount|vnd }}<br>Nội dung: {{ payload.purpose }}<br>Mã lệnh: {{ payload.request_id }}<br>
+        Nonce: {{ payload.nonce[:12] }}…</div>
+      <form method="post" action="/payments/{{ req.id }}/decide" class="row">
+        <button name="decision" value="APPROVE">Ký PHÊ DUYỆT</button>
+        <button name="decision" value="REJECT" class="danger">Ký TỪ CHỐI</button>
+      </form>
+      <form method="post" action="/payments/{{ req.id }}/decide">
+        <input type="hidden" name="decision" value="APPROVE"><input type="hidden" name="tamper" value="1">
+        <button class="ghost">⚠ Tấn công: mã độc tráo số tiền hiển thị (÷10) rồi ký</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Gọi lại xác minh (out-of-band)</h2>
+      <p class="muted">Gọi tới số trong {{ 'danh bạ nội bộ của ' ~ svc.users[req.claimed_by].full_name ~ ': ' ~ svc.users[req.claimed_by].phone if req.claimed_by else 'sổ đăng ký NCC: ' ~ bene.contact_phone }}</p>
+      <form method="post" action="/payments/{{ req.id }}/callback">
+        <label>Số điện thoại đã gọi</label><input name="phone" placeholder="VD: số người gọi đọc cho bạn">
+        <label>Kết quả</label><select name="confirmed"><option value="yes">Xác nhận đúng là họ yêu cầu</option>
+          <option value="no">Họ KHÔNG yêu cầu (nghi giả mạo)</option></select>
+        <label>Ghi chú</label><input name="note"><button>Ghi nhận</button>
+      </form>
+    </div>
+    {% endif %}
+    {% if req.status == 'APPROVED' and me.user.role in ['MAKER', 'CHIEF_ACCOUNTANT'] %}
+    <div class="card"><h2>Thực thi</h2>
+      <form method="post" action="/payments/{{ req.id }}/execute"><button>Gửi lệnh sang ngân hàng</button></form></div>
+    {% endif %}
+    {% if req.status in ['APPROVED', 'PENDING_APPROVAL'] %}
+    <div class="card"><h2>⚠ Mô phỏng nội gián sửa CSDL</h2>
+      <form method="post" action="/payments/{{ req.id }}/tamper-db"><label>STK mới</label><input name="account_no" value="970422998811">
+        <button class="danger">Sửa trực tiếp trong CSDL</button></form></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

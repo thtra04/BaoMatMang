@@ -1,0 +1,120 @@
+
+=== KB01 – Luồng bình thường: lệnh nhỏ, 1 người duyệt ===
+  1. [THÀNH CÔNG] Kế toán tạo lệnh 40 triệu cho nhà cung cấp quen
+       → Rủi ro LOW (0), cần 1 người duyệt
+  2. [THÀNH CÔNG] Kế toán trưởng xem nội dung trên điện thoại và ký duyệt
+       → Trạng thái: APPROVED
+  3. [THÀNH CÔNG] Lệnh được gửi sang ngân hàng
+       → Mã giao dịch FTDA92FD2925
+
+=== KB02 – Luồng bình thường: lệnh 120 triệu, 2 người duyệt ===
+  1. [THÀNH CÔNG] Tạo lệnh 120 triệu
+       → Rủi ro LOW, cần 2 người duyệt
+  2. [THÔNG TIN] Kế toán trưởng duyệt – chưa đủ
+       → Cần 2 người duyệt, mới có 1
+  3. [THÀNH CÔNG] Giám đốc duyệt → lệnh được thực thi
+       → Mã giao dịch FT165ABD65A7
+
+=== KB03 – Deepfake video Giám đốc + số tài khoản lạ ===
+  1. [THÔNG TIN] Kế toán nhận cuộc gọi video 'Giám đốc Lê Hoàng Nam' (deepfake): chuyển gấp 850 triệu đặt cọc dự án mật, STK 9704 2299 8811
+       → Hình ảnh và giọng nói giống thật – hệ thống KHÔNG dựa vào đó
+  2. [THÀNH CÔNG] Hệ thống chấm điểm rủi ro
+       → Trạng thái BLOCKED: Số tài khoản trong tin nhắn (970422998811) KHÁC số tài khoản đã xác minh trong sổ đăng ký (19033334444015) – dấu hiệu lừa đảo đổi tài khoản (BEC)
+
+=== KB04 – Giả giọng Giám đốc, chuyển cho NCC có sẵn ===
+  1. [THÀNH CÔNG] Kẻ gian giả giọng Giám đốc, yêu cầu chuyển 300 triệu cho NCC có trong sổ
+       → Rủi ro HIGH (80 điểm). Điều kiện: Cần 2 người duyệt, mới có 0; Cần chữ ký của Giám đốc / Phó Giám đốc; Cần chính Lê Hoàng Nam ký xác nhận trên thiết bị đã đăng ký; Cần gọi lại xác minh qua số điện thoại trong danh bạ/sổ đăng ký
+  2. [BỊ CHẶN] Kế toán thử thực thi khi mới có Kế toán trưởng duyệt
+       → CHUA_DU_PHE_DUYET: Lệnh chưa đủ điều kiện thực thi: Cần 2 người duyệt, mới có 1; Cần chữ ký của Giám đốc / Phó Giám đốc; Cần chính Lê Hoàng Nam ký xác nhận trên thiết bị đã đăng ký; Cần gọi lại xác minh qua số điện thoại trong danh bạ/sổ đăng ký
+  3. [BỊ CHẶN] Kế toán trưởng gọi lại số do 'Giám đốc' đọc trong cuộc gọi (0988 777 666)
+       → SO_GOI_LAI_KHONG_HOP_LE: Phải gọi lại số trong danh bạ nội bộ/sổ đăng ký, không dùng số do người yêu cầu cung cấp
+  4. [THÀNH CÔNG] Gọi lại số của Giám đốc trong danh bạ nội bộ → GĐ xác nhận không yêu cầu
+       → Trạng thái lệnh: REJECTED
+
+=== KB05 – Email giả nhà cung cấp đổi số tài khoản (BEC) ===
+  1. [THÀNH CÔNG] Nhận email 'đổi số tài khoản' từ nhà cung cấp
+       → Yêu cầu C001 ở trạng thái PENDING_CALLBACK – STK cũ vẫn giữ nguyên
+  2. [BỊ CHẶN] Gọi lại số điện thoại ghi trong email
+       → SO_GOI_LAI_KHONG_HOP_LE: Phải gọi lại số điện thoại trong sổ đăng ký, không dùng số trong email/tin nhắn
+  3. [THÀNH CÔNG] Gọi lại số trong sổ đăng ký → NCC xác nhận không gửi email
+       → Yêu cầu đổi STK: REJECTED
+  4. [BỊ CHẶN] Kẻ gian thúc giục duyệt đổi STK
+       → CHUA_XAC_MINH: Chưa gọi lại xác minh với nhà cung cấp
+  5. [THÔNG TIN] Số tài khoản trong sổ vẫn là
+       → 0071000123456
+
+=== KB06 – Đổi số tài khoản hợp lệ + thời gian chờ 48h ===
+  1. [THÀNH CÔNG] Đổi STK hợp lệ: gọi lại đúng số + Kế toán trưởng ký duyệt
+       → Thời gian chờ an toàn 48 giờ bắt đầu
+  2. [THÀNH CÔNG] Tạo lệnh ngay sau khi đổi STK
+       → Trạng thái BLOCKED: Tài khoản thụ hưởng vừa được thay đổi, đang trong thời gian chờ an toàn 48 giờ
+  3. [THÀNH CÔNG] Sau 49 giờ tạo lại lệnh
+       → Rủi ro MEDIUM (30): cần 2 người duyệt
+
+=== KB07 – Lộ mật khẩu, dò mã OTP ===
+  1. [BỊ CHẶN] Lần 1: đúng mật khẩu (bị lộ) nhưng đoán OTP
+       → OTP_KHONG_HOP_LE: Mã OTP không đúng hoặc đã hết hạn
+  2. [BỊ CHẶN] Lần 2: đúng mật khẩu (bị lộ) nhưng đoán OTP
+       → OTP_KHONG_HOP_LE: Mã OTP không đúng hoặc đã hết hạn
+  3. [BỊ CHẶN] Lần 3: đúng mật khẩu (bị lộ) nhưng đoán OTP
+       → OTP_KHONG_HOP_LE: Mã OTP không đúng hoặc đã hết hạn
+  4. [BỊ CHẶN] Lần 4: đúng mật khẩu (bị lộ) nhưng đoán OTP
+       → OTP_KHONG_HOP_LE: Mã OTP không đúng hoặc đã hết hạn
+  5. [BỊ CHẶN] Lần 5: đúng mật khẩu (bị lộ) nhưng đoán OTP
+       → OTP_KHONG_HOP_LE: Mã OTP không đúng hoặc đã hết hạn
+  6. [BỊ CHẶN] Lần 6: dù có đủ thông tin cũng bị từ chối do tài khoản tạm khoá
+       → TAI_KHOAN_TAM_KHOA: Tài khoản đang bị tạm khoá do đăng nhập sai nhiều lần
+
+=== KB08 – Bị lừa lấy mật khẩu + OTP (phishing) ===
+  1. [BỊ CHẶN] Kẻ gian lừa lấy được mật khẩu + OTP (trang giả mạo), đăng nhập từ máy của mình
+       → THIET_BI_CHUA_DANG_KY: Thiết bị chưa được đăng ký hoặc chưa được kích hoạt
+  2. [THÀNH CÔNG] Kẻ gian đăng ký 'thiết bị mới'
+       → Thiết bị ở trạng thái PENDING, chủ tài khoản nhận cảnh báo
+  3. [BỊ CHẶN] Đăng nhập bằng thiết bị đang chờ duyệt
+       → THIET_BI_CHUA_DANG_KY: Thiết bị chưa được đăng ký hoặc chưa được kích hoạt
+
+=== KB09 – Đánh cắp phiên đăng nhập (session hijacking) ===
+  1. [BỊ CHẶN] Kẻ gian đánh cắp cookie phiên của Kế toán trưởng, ký duyệt bằng khoá của mình
+       → CHU_KY_KHONG_HOP_LE: Chữ ký không khớp với nội dung lệnh
+
+=== KB10 – Tráo nội dung lúc ký (mã độc/MITM) ===
+  1. [BỊ CHẶN] Mã độc trên trình duyệt sửa số tiền hiển thị thành 4.800.000 đ để lừa người duyệt ký
+       → CHU_KY_KHONG_HOP_LE: Chữ ký không khớp với nội dung lệnh
+
+=== KB11 – Sửa dữ liệu trong CSDL sau khi duyệt ===
+  1. [THÔNG TIN] Kẻ nội gián sửa trực tiếp STK của lệnh đã duyệt trong CSDL
+       → 970422998811
+  2. [BỊ CHẶN] Thực thi lệnh
+       → DU_LIEU_BI_SUA_DOI: Dữ liệu lệnh bị thay đổi trái phép
+
+=== KB12 – Tự tạo – tự duyệt ===
+  1. [BỊ CHẶN] Kế toán trưởng tự tạo rồi tự duyệt lệnh
+       → TACH_BIET_NHIEM_VU: Người tạo lệnh không được tự phê duyệt
+
+=== KB13 – Thiết bị người duyệt bị chiếm → khoá khẩn cấp ===
+  1. [THÔNG TIN] Điện thoại của Kế toán trưởng bị chiếm và đã ký duyệt 1 lệnh
+       → Trạng thái APPROVED
+  2. [THÀNH CÔNG] Kế toán trưởng gọi hotline, quản trị viên kích hoạt khoá khẩn cấp
+       → Thu hồi ['ketoantruong-phone'], huỷ duyệt các lệnh ['PR-0001']
+  3. [BỊ CHẶN] Phiên cũ của thiết bị bị chiếm tiếp tục thao tác
+       → PHIEN_KHONG_HOP_LE: Phiên đăng nhập không tồn tại hoặc đã bị thu hồi
+  4. [BỊ CHẶN] Thực thi lệnh đã duyệt trước đó
+       → CHUA_DU_PHE_DUYET: Lệnh chưa đủ điều kiện thực thi: Cần 1 người duyệt, mới có 0
+
+=== KB14 – Sửa / xoá nhật ký kiểm toán ===
+  1. [THÔNG TIN] Kiểm tra nhật ký ban đầu
+       → Toàn vẹn
+  2. [PHÁT HIỆN] Sửa STK trong bản ghi nhật ký để che dấu vết
+       → Phát hiện: Bản ghi #18: nội dung bị sửa (hash không khớp)
+  3. [PHÁT HIỆN] Xoá 3 bản ghi cuối nhật ký
+       → Phát hiện nhờ mốc neo bên ngoài: Nhật ký bị cắt cụt: mốc neo ở bản ghi #18 nhưng chỉ còn 16 bản ghi
+
+=== KB15 – Ảnh hoá đơn bị sửa STK, ảnh chụp màn hình 'đã duyệt' giả ===
+  1. [THÔNG TIN] Kế toán nhận qua Zalo ảnh chụp hoá đơn của Minh Phát – STK trên ảnh đã bị chỉnh sửa thành 0071000999888
+       → Ảnh trông như hoá đơn thật – hệ thống KHÔNG đọc STK từ ảnh
+  2. [THÀNH CÔNG] Nhập STK trên ảnh để đối chiếu
+       → Trạng thái BLOCKED: Số tài khoản trong tin nhắn (0071000999888) KHÁC số tài khoản đã xác minh trong sổ đăng ký (0071000123456) – dấu hiệu lừa đảo đổi tài khoản (BEC)
+  3. [THÀNH CÔNG] Kẻ gian gửi ảnh chụp màn hình 'Giám đốc đã duyệt' để hối thúc
+       → Rủi ro MEDIUM (45). Điều kiện: Cần 2 người duyệt, mới có 0; Cần chính Lê Hoàng Nam ký xác nhận trên thiết bị đã đăng ký; Cần gọi lại xác minh qua số điện thoại trong danh bạ/sổ đăng ký
+  4. [BỊ CHẶN] Kế toán trưởng duyệt rồi thực thi, coi ảnh chụp như chữ ký của Giám đốc
+       → CHUA_DU_PHE_DUYET: Lệnh chưa đủ điều kiện thực thi: Cần 2 người duyệt, mới có 1; Cần chính Lê Hoàng Nam ký xác nhận trên thiết bị đã đăng ký; Cần gọi lại xác minh qua số điện thoại trong danh bạ/sổ đăng ký
